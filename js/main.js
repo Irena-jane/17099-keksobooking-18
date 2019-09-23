@@ -3,16 +3,38 @@
 var USER_MAX = 8;
 var USER_MIN = 1;
 
-var PIN_WIDTH = 50;
-var PIN_HEIGHT = 70;
-
 var MIN_Y = 130;
 var MAX_Y = 630;
 
-var minLocationY = MIN_Y + PIN_HEIGHT;
+var getPinParams = function () {
+  var template = document.querySelector('#pin')
+  .content
+  .querySelector('.map__pin');
 
-var minLocationX = PIN_WIDTH / 2;
-var maxLocationX = document.documentElement.clientWidth - PIN_WIDTH / 2;
+  var pin = template.cloneNode(true);
+  var container = document.createElement('div');
+  container.style.opacity = 0;
+  container.style.left = 0;
+  container.style.top = 0;
+  container.appendChild(pin);
+  document.body.appendChild(container);
+
+  var size = {};
+  size.width = container.querySelector('.map__pin').clientWidth;
+  size.height = container.querySelector('.map__pin').clientHeight;
+  document.body.removeChild(container);
+
+  return size;
+};
+
+var params = getPinParams();
+var pinWidth = params.width;
+var pinHeight = params.height;
+
+var minLocationY = MIN_Y + pinHeight;
+
+var minLocationX = pinWidth / 2;
+var maxLocationX = document.documentElement.clientWidth - pinWidth / 2;
 
 var titles = ['Сдается милая уютная квартирка.',
   '7 причин снять эту квартиру!',
@@ -35,6 +57,7 @@ var descriptions = ['Отличное предложение в одном из 
   'Редкая возможность жить в красивой современной квартире и одновременно в окружении старинной архитектуры и духа старого Токио!'];
 
 var photos = ['http://o0.github.io/assets/images/tokyo/hotel1.jpg', 'http://o0.github.io/assets/images/tokyo/hotel2.jpg', 'http://o0.github.io/assets/images/tokyo/hotel3.jpg'];
+
 
 var getRandomArr = function (arr) {
   var randomSort = function () {
@@ -95,8 +118,8 @@ document.querySelector('.map').classList.remove('map--faded');
 
 var createMapPin = function (obj, template) {
   var elem = template.cloneNode(true);
-  elem.style.left = obj.location.x - PIN_WIDTH / 2 + 'px';
-  elem.style.top = obj.location.y - PIN_HEIGHT + 'px';
+  elem.style.left = obj.location.x - pinWidth / 2 + 'px';
+  elem.style.top = obj.location.y - pinHeight + 'px';
 
   var elemImg = elem.querySelector('img');
   elemImg.src = obj.author.avatar;
@@ -108,6 +131,10 @@ var createMapPin = function (obj, template) {
 
 var createMapPins = function () {
   var ads = createAds(USER_MAX);
+  renderMapPins(ads);
+};
+
+var renderMapPins = function (ads) {
   var template = document.querySelector('#pin')
   .content
   .querySelector('.map__pin');
