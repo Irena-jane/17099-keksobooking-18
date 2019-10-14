@@ -3,6 +3,9 @@
 var USER_MAX = 8;
 var USER_MIN = 1;
 
+var ESC_KEYCODE = 27;
+var ENTER_KEYCODE = 13;
+
 var MIN_Y = 130;
 var MAX_Y = 630;
 
@@ -117,7 +120,321 @@ var createAds = function (num) {
   return ads;
 };
 
-document.querySelector('.map').classList.remove('map--faded');
+var getAllFormsFields = function () {
+  var fields = [].slice.call(adForm.querySelectorAll('fieldset'));
+  var filterFields = [].slice.call(formFilters.querySelectorAll('fieldset'));
+  var filterSelects = [].slice.call(formFilters.querySelectorAll('select'));
+  var _fields = fields.concat(filterFields, filterSelects);
+  return _fields;
+};
+var setFormsDisabled = function () {
+  adForm.classList.add('ad-form--disabled');
+  var fields = getAllFormsFields();
+  fields.forEach(function (elem) {
+    elem.setAttribute('disabled', '');
+  });
+};
+// Активация/дезактивация формы и страницы
+var setFormsActive = function () {
+  adForm.classList.remove('ad-form--disabled');
+  var fields = getAllFormsFields();
+  fields.forEach(function (elem) {
+    elem.disabled = false;
+  });
+};
+
+var setPageDisabled = function () {
+  map.classList.add('map--faded');
+  setFormsDisabled();
+};
+var setPageActive = function () {
+  map.classList.remove('map--faded');
+  setFormsActive();
+};
+
+var map = document.querySelector('.map');
+var adForm = document.querySelector('.ad-form');
+var formFilters = document.querySelector('.map__filters');
+setFormsDisabled();
+
+// Уставновка обработчика на метку
+var mainPin = document.querySelector('.map__pin--main');
+
+// Заполнение адреса
+
+var setAddress = function (e) {
+  var addressElem = adForm.querySelector('#address');
+  var top = parseInt(mainPin.style.top, 10);
+  var left = parseInt(mainPin.style.left, 10);
+  var _left = Math.round(left + pinWidth / 2);
+  var _top;
+  if (!e
+    || e.type !== 'mousedown'
+    || e.type !== 'mousemove') {
+
+    _top = Math.round(top + pinHeight / 2);
+  }
+
+  if (e && e.type === 'mousedown'
+    || e && e.type === 'mousemove') {
+    _top = Math.round(top + pinHeight);
+  }
+
+
+  addressElem.value = _left + ', ' + _top;
+};
+setAddress();
+
+var mouseDownPinHandler = function (e) {
+  setPageActive();
+  setAddress(e);
+};
+var keyDownPinHandler = function (e) {
+  if (e.keyCode === ENTER_KEYCODE) {
+    setPageActive();
+    setAddress(e);
+  }
+};
+
+mainPin.addEventListener('mousedown', mouseDownPinHandler);
+mainPin.addEventListener('keydown', keyDownPinHandler);
+
+// Валидация формы
+function CustomValidation() {
+  this.invalidities = [];
+}
+CustomValidation.prototype = {
+  // invalidities: [],
+
+  checkValidity: function (input) {
+    var validity = input.validity;
+    // console.log('from checkValidity ' + input.id + ' ', validity);
+
+    if (validity.valueMissing) {
+      this.addInvalidity('Обязательное поле');
+    }
+
+    if (validity.tooShort) {
+      var minL = input.getAttribute('minlength');
+      var str = input.value;
+      this.addInvalidity('Минимальное число символов не меньше ' + minL + '. Не хватает ' + (minL - str.length));
+    }
+
+    if (validity.tooLong) {
+      var maxL = input.getAttribute('maxlength');
+      this.addInvalidity('Максимальное число символов не больше ' + maxL);
+    }
+
+    if (validity.rangeOverflow) {
+      var max = input.getAttribute('max');
+      this.addInvalidity('Максимальное значение поля не больше ' + max);
+    }
+
+    if (validity.rangeUnderflow) {
+      var min = input.getAttribute('min');
+      this.addInvalidity('Минимальное значение поля не меньше ' + min);
+    }
+
+
+  },
+
+  addInvalidity: function (message) {
+    this.invalidities.push(message);
+  },
+
+  getInvalidities: function () {
+    return this.invalidities.join('. ');
+  },
+  getInvaliditiesForHTML: function () {
+    return this.invalidities.join('. <br>');
+  }
+};
+
+
+var showError = function (input) {
+  input.classList.add('show-error');
+};
+var removeError = function (input) {
+  input.classList.remove('show-error');
+};
+var showAllErrors = function (arr) {
+  arr.forEach(function (input) {
+    showError(input);
+  });
+};
+var removeAllErrors = function (arr) {
+
+  arr.forEach(function (input) {
+    removeError(input);
+  });
+};
+
+var relationInputDic = {
+  'room_number': 'capacity',
+  'timein': 'timeout',
+  'type': 'price',
+  'capacity': 'room_number',
+  'timeout': 'timein',
+  'price': 'type'
+};
+
+var roomsInput = document.querySelector('#room_number');
+var capacityInput = document.querySelector('#capacity');
+var timein = document.querySelector('#timein');
+var timeout = document.querySelector('#timeout');
+var priceInput = document.querySelector('#price');
+var typeInput = document.querySelector('#type');
+
+var roomsCapacityDic = {
+  '100': ['0'],
+  '1': ['1'],
+  '2': ['1', '2'],
+  '3': ['1', '2', '3']
+};
+
+var typePriceDic = {
+  'bungalo': {'min': 0, 'max': 1000},
+  'flat': {'min': 1000, 'max': 5000},
+  'house': {'min': 5000, 'max': 10000},
+  'palace': {'min': 10000, 'max': 1000001}
+};
+
+var changePriceTypeHandler = function (e) {
+  var target = e.target;
+  var related = document.querySelector('#' + relationInputDic[target.id]);
+
+  var priceElem = target.id === 'price' ? target : related;
+  var typeElem = target.id === 'type' ? target : related;
+  var getIsValid = function () {
+    var price = parseInt(priceElem.value, 10);
+    return (typePriceDic[typeElem.value]['min'] <= price
+      && price < typePriceDic[typeElem.value]['max']);
+
+  };
+  var inputs = [];
+  inputs.push(target, related);
+  if (!getIsValid(target, related)) {
+
+    showAllErrors(inputs);
+    return;
+  }
+  removeAllErrors(inputs);
+};
+var changeTimeHandler = function (e) {
+  var target = e.target;
+  var related = document.querySelector('#' + relationInputDic[target.id]);
+  if (target.value !== related.value) {
+    related.value = target.value;
+  }
+};
+var changeCapacityHandler = function (e) {
+  var target = e.target;
+  var related = document.querySelector('#' + relationInputDic[target.id]);
+
+  var getIsValid = function () {
+    var isValid = false;
+    var roomsVal = target.id === 'room_number' ? target.value : related.value;
+    var capacityVal = related.id === 'capacity' ? related.value : target.value;
+
+
+    var values = roomsCapacityDic[roomsVal];
+    values.forEach(function (item) {
+      if (item === capacityVal) {
+        isValid = true;
+      }
+    });
+
+    return isValid;
+  };
+
+  var inputs = [];
+  inputs.push(target, related);
+  if (!getIsValid(target, related)) {
+
+    showAllErrors(inputs);
+    return;
+  }
+  removeAllErrors(inputs);
+};
+
+roomsInput.addEventListener('change', changeCapacityHandler);
+capacityInput.addEventListener('change', changeCapacityHandler);
+
+timein.addEventListener('change', changeTimeHandler);
+timeout.addEventListener('change', changeTimeHandler);
+
+priceInput.addEventListener('change', changePriceTypeHandler);
+typeInput.addEventListener('change', changePriceTypeHandler);
+
+var adFormElements = [].slice.call(adForm.elements);
+var _adFormElements = adFormElements.filter(function (item) {
+  if (item.tagName !== 'FIELDSET'
+    && item.tagName !== 'BUTTON') {
+    return true;
+  }
+  return false;
+});
+
+_adFormElements.forEach(function (input) {
+  var eName = 'input';
+  if (input.tagName === 'SELECT') {
+    eName = 'change';
+  }
+  var validation = new CustomValidation();
+  validation.getInvalidities.bind(validation);
+  input.addEventListener(eName, function () {
+
+    validation.checkValidity(input);
+    var message = validation.getInvalidities();
+    if (message) {
+      input.setCustomValidity(message);
+      validation.invalidities = [];
+    } else {
+      input.setCustomValidity('');
+      validation.invalidities = [];
+
+    }
+
+  });
+
+});
+
+// adForm.addEventListener('input', );
+
+adForm.addEventListener('submit', function (e) {
+  e.preventDefault();
+  var stopSubmit;
+
+  _adFormElements.forEach(function (input) {
+
+    // if (input.checkValidity() == false) {
+
+    var validation = new CustomValidation(); // Создадим объект CustomValidation
+    validation.checkValidity(input); // Выявим ошибки
+    var message = validation.getInvalidities();
+    // Получим все сообщения об ошибках
+
+    if (message) {
+      input.setCustomValidity(message); // Установим специальное сообщение об ошибке
+      // console.log(message);
+    } else {
+      input.setCustomValidity('');
+    }
+
+    // Добавим ошибки в документ
+    var customValidityMessageForHTML = validation.getInvaliditiesForHTML();
+    input.insertAdjacentHTML('afterend', '<p class="error-message">' + customValidityMessageForHTML + '</p>');
+    stopSubmit = true;
+    // }
+
+  });
+
+  if (stopSubmit) {
+    e.preventDefault();
+  }
+
+});
+// Создание меток
 
 var createMapPin = function (obj, template) {
   var elem = template.cloneNode(true);
@@ -148,8 +465,8 @@ var createMapPins = function () {
 
   document.querySelector('.map__pins').appendChild(fragment);
 };
-
-createMapPins();
+// Вызов метода создания меток
+// createMapPins();
 
 var getRightType = function (type) {
   var _type;
@@ -277,5 +594,7 @@ var createCard = function (obj) {
 
   return elem;
 };
-var map = document.querySelector('.map');
-map.insertBefore(createCard(ads[0]), document.querySelector('.map__filters-container'));
+
+// Вызов метода отрисовки карточки
+// map.insertBefore(createCard(ads[0]), document.querySelector('.map__filters-container'));
+

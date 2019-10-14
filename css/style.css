@@ -617,7 +617,8 @@ fieldset {
 .ad-form__element input:hover,
 .ad-form__element select:hover,
 .ad-form__element textarea:hover {
-  border-color: #ffaa99;
+  /*border-color: #ffaa99;*/#ffaa99
+  border-color: #44bb66;
 }
 
 .ad-form__element input:focus,
@@ -626,6 +627,26 @@ fieldset {
   outline: none;
   -webkit-box-shadow: 0 0 2px 2px #ff6547;
           box-shadow: 0 0 2px 2px #ff6547;
+ /* -webkit-box-shadow: 0 0 2px 2px #44bb66;
+          box-shadow: 0 0 2px 2px #44bb66;*/
+}
+
+.ad-form__element input:valid:focus,
+.ad-form__element select:valid:focus,
+.ad-form__element textarea:valid:focus {
+  outline: none;
+  -webkit-box-shadow: 0 0 2px 2px #44bb66;
+  box-shadow: 0 0 2px 2px #44bb66;
+}
+
+.ad-form__element input:invalid,
+.ad-form__element select:invalid,
+.ad-form__element textarea:invalid,
+.show-error {
+  outline: none;
+  -webkit-box-shadow: 0 0 2px 2px #ff6547;
+          box-shadow: 0 0 2px 2px #ff6547;
+  background-color: #fcdcd6!important;
 }
 
 .ad-form__element--time {
