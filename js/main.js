@@ -300,7 +300,7 @@ var typePriceDic = {
   'bungalo': {'min': 0, 'max': 1000},
   'flat': {'min': 1000, 'max': 5000},
   'house': {'min': 5000, 'max': 10000},
-  'palace': {'min': 10000, 'max': 1000001}
+  'palace': {'min': 10000, 'max': 1000000}
 };
 
 var checkErrorsRelatedInputs = function (target, related, getIsValid) {
@@ -323,10 +323,16 @@ var changePriceTypeHandler = function (e, input) {
 
   var priceElem = target.id === 'price' ? target : related;
   var typeElem = target.id === 'type' ? target : related;
+
+  var typeValue = typeElem.options[typeElem.selectedIndex].value;
+  priceElem.setAttribute('min', typePriceDic[typeValue]['min']);
+  priceElem.setAttribute('placeholder', typePriceDic[typeValue]['min']);
+  priceElem.setAttribute('max', typePriceDic[typeValue]['max']);
+
   var getIsValid = function () {
     var price = parseInt(priceElem.value, 10);
-    return (typePriceDic[typeElem.value]['min'] <= price
-      && price < typePriceDic[typeElem.value]['max']);
+    return (typePriceDic[typeElem.value]['min'] < price
+      && price <= typePriceDic[typeElem.value]['max']);
 
   };
 
