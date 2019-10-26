@@ -300,7 +300,7 @@ var typePriceDic = {
   'bungalo': {'min': 0, 'max': 1000},
   'flat': {'min': 1000, 'max': 5000},
   'house': {'min': 5000, 'max': 10000},
-  'palace': {'min': 10000, 'max': 1000001}
+  'palace': {'min': 10000, 'max': 1000000}
 };
 
 var checkErrorsRelatedInputs = function (target, related, getIsValid) {
@@ -323,10 +323,16 @@ var changePriceTypeHandler = function (e, input) {
 
   var priceElem = target.id === 'price' ? target : related;
   var typeElem = target.id === 'type' ? target : related;
+
+  var typeValue = typeElem.options[typeElem.selectedIndex].value;
+  priceElem.setAttribute('min', typePriceDic[typeValue]['min']);
+  priceElem.setAttribute('placeholder', typePriceDic[typeValue]['min']);
+  priceElem.setAttribute('max', typePriceDic[typeValue]['max']);
+
   var getIsValid = function () {
     var price = parseInt(priceElem.value, 10);
-    return (typePriceDic[typeElem.value]['min'] <= price
-      && price < typePriceDic[typeElem.value]['max']);
+    return (typePriceDic[typeElem.value]['min'] < price
+      && price <= typePriceDic[typeElem.value]['max']);
 
   };
 
@@ -458,10 +464,61 @@ var createMapPins = function () {
     fragment.appendChild(elem);
   }
 
-  document.querySelector('.map__pins').appendChild(fragment);
+  var mapPinsContainer = document.querySelector('.map__pins');
+  mapPinsContainer.appendChild(fragment);
+
+  var pins = [].slice.call(mapPinsContainer.querySelectorAll('.map__pin'));
+
+  return pins.filter(function (pin) {
+    return !pin.classList.contains('map__pin--main');
+  });
+
 };
+
 // Вызов метода создания меток
-// createMapPins();
+var mapPins = createMapPins();
+
+
+var popupClose = function () {
+  var popup = map.querySelector('.popup');
+  if (!popup) {
+    return;
+  }
+  map.removeChild(popup);
+  popup.removeEventListener('click', clickPinHandler);
+  document.removeEventListener('keydown', escapePopupHandler);
+};
+
+var popupOpen = function (pin) {
+  var index = mapPins.indexOf(pin);
+  var mapLastElem = document.querySelector('.map__filters-container');
+  var popup = createCard(ads[index]);
+  map.insertBefore(popup, mapLastElem);
+  var closePopupBtn = popup.querySelector('.popup__close');
+
+  closePopupBtn.addEventListener('click', clickClosePopupHandler);
+  document.addEventListener('keydown', escapePopupHandler);
+};
+
+var clickClosePopupHandler = function () {
+  popupClose();
+};
+var escapePopupHandler = function (e) {
+  var popup = e.target.closest('.popup');
+  if (e.keyCode === ESC_KEYCODE) {
+    popupClose(popup);
+  }
+};
+
+var clickPinHandler = function (e) {
+  popupClose();
+  var pin = e.target.closest('.map__pin');
+  popupOpen(pin);
+};
+
+mapPins.forEach(function (pin) {
+  pin.addEventListener('click', clickPinHandler);
+});
 
 var getRightType = function (type) {
   var _type;
@@ -593,3 +650,4 @@ var createCard = function (obj) {
 // Вызов метода отрисовки карточки
 // map.insertBefore(createCard(ads[0]), document.querySelector('.map__filters-container'));
 
+popupOpen(mapPins[0]);
