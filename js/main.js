@@ -204,9 +204,8 @@ function CustomValidation() {
   this.invalidities = [];
 }
 CustomValidation.prototype = {
-  // invalidities: [],
 
-  checkValidity: function (input) {
+  checkValidity: function (input, e) {
     var validity = input.validity;
     // console.log('from checkValidity ' + input.id + ' ', validity);
 
@@ -235,6 +234,20 @@ CustomValidation.prototype = {
       this.addInvalidity('Минимальное значение поля не меньше ' + min);
     }
 
+    if (input.id === 'price' || input.id === 'type') {
+      var isValidPrice = changePriceTypeHandler(e, input);
+      if (!isValidPrice) {
+        this.addInvalidity('Несовпадение по типу и цене');
+      }
+    }
+
+    if (input.id === 'room_number' || input.id === 'capacity') {
+      var isValidCapacity = changeCapacityHandler(e, input);
+      if (!isValidCapacity) {
+        this.addInvalidity('Несовпадение количества комнат и гостей');
+      }
+    }
+
 
   },
 
@@ -244,10 +257,8 @@ CustomValidation.prototype = {
 
   getInvalidities: function () {
     return this.invalidities.join('. ');
-  },
-  getInvaliditiesForHTML: function () {
-    return this.invalidities.join('. <br>');
   }
+
 };
 
 
@@ -278,13 +289,6 @@ var relationInputDic = {
   'price': 'type'
 };
 
-var roomsInput = document.querySelector('#room_number');
-var capacityInput = document.querySelector('#capacity');
-var timein = document.querySelector('#timein');
-var timeout = document.querySelector('#timeout');
-var priceInput = document.querySelector('#price');
-var typeInput = document.querySelector('#type');
-
 var roomsCapacityDic = {
   '100': ['0'],
   '1': ['1'],
@@ -299,8 +303,22 @@ var typePriceDic = {
   'palace': {'min': 10000, 'max': 1000001}
 };
 
-var changePriceTypeHandler = function (e) {
-  var target = e.target;
+var checkErrorsRelatedInputs = function (target, related, getIsValid) {
+
+  var inputs = [];
+  inputs.push(target, related);
+  if (!getIsValid(target, related)) {
+
+    showAllErrors(inputs);
+    return false;
+  }
+  related.setCustomValidity('');
+  removeAllErrors(inputs);
+  return true;
+};
+
+var changePriceTypeHandler = function (e, input) {
+  var target = e.type === 'submit' ? input : e.target;
   var related = document.querySelector('#' + relationInputDic[target.id]);
 
   var priceElem = target.id === 'price' ? target : related;
@@ -311,24 +329,12 @@ var changePriceTypeHandler = function (e) {
       && price < typePriceDic[typeElem.value]['max']);
 
   };
-  var inputs = [];
-  inputs.push(target, related);
-  if (!getIsValid(target, related)) {
 
-    showAllErrors(inputs);
-    return;
-  }
-  removeAllErrors(inputs);
+  return checkErrorsRelatedInputs(target, related, getIsValid);
 };
-var changeTimeHandler = function (e) {
-  var target = e.target;
-  var related = document.querySelector('#' + relationInputDic[target.id]);
-  if (target.value !== related.value) {
-    related.value = target.value;
-  }
-};
-var changeCapacityHandler = function (e) {
-  var target = e.target;
+
+var changeCapacityHandler = function (e, input) {
+  var target = e.type === 'submit' ? input : e.target;
   var related = document.querySelector('#' + relationInputDic[target.id]);
 
   var getIsValid = function () {
@@ -346,25 +352,23 @@ var changeCapacityHandler = function (e) {
 
     return isValid;
   };
-
-  var inputs = [];
-  inputs.push(target, related);
-  if (!getIsValid(target, related)) {
-
-    showAllErrors(inputs);
-    return;
-  }
-  removeAllErrors(inputs);
+  return checkErrorsRelatedInputs(target, related, getIsValid);
 };
 
-roomsInput.addEventListener('change', changeCapacityHandler);
-capacityInput.addEventListener('change', changeCapacityHandler);
+// Обработчики полей времени
+var timein = document.querySelector('#timein');
+var timeout = document.querySelector('#timeout');
+
+var changeTimeHandler = function (e) {
+  var target = e.target;
+  var related = document.querySelector('#' + relationInputDic[target.id]);
+  if (target.value !== related.value) {
+    related.value = target.value;
+  }
+};
 
 timein.addEventListener('change', changeTimeHandler);
 timeout.addEventListener('change', changeTimeHandler);
-
-priceInput.addEventListener('change', changePriceTypeHandler);
-typeInput.addEventListener('change', changePriceTypeHandler);
 
 var adFormElements = [].slice.call(adForm.elements);
 var _adFormElements = adFormElements.filter(function (item) {
@@ -381,10 +385,10 @@ _adFormElements.forEach(function (input) {
     eName = 'change';
   }
   var validation = new CustomValidation();
-  validation.getInvalidities.bind(validation);
-  input.addEventListener(eName, function () {
+  validation.getInvalidities(validation);
+  input.addEventListener(eName, function (e) {
 
-    validation.checkValidity(input);
+    validation.checkValidity(input, e);
     var message = validation.getInvalidities();
     if (message) {
       input.setCustomValidity(message);
@@ -399,38 +403,29 @@ _adFormElements.forEach(function (input) {
 
 });
 
-// adForm.addEventListener('input', );
-
 adForm.addEventListener('submit', function (e) {
   e.preventDefault();
-  var stopSubmit;
+  var form = e.target;
 
   _adFormElements.forEach(function (input) {
 
-    // if (input.checkValidity() == false) {
-
     var validation = new CustomValidation(); // Создадим объект CustomValidation
-    validation.checkValidity(input); // Выявим ошибки
+    validation.checkValidity(input, e); // Выявим ошибки
     var message = validation.getInvalidities();
     // Получим все сообщения об ошибках
 
     if (message) {
       input.setCustomValidity(message); // Установим специальное сообщение об ошибке
-      // console.log(message);
+
     } else {
       input.setCustomValidity('');
-    }
 
-    // Добавим ошибки в документ
-    var customValidityMessageForHTML = validation.getInvaliditiesForHTML();
-    input.insertAdjacentHTML('afterend', '<p class="error-message">' + customValidityMessageForHTML + '</p>');
-    stopSubmit = true;
-    // }
+    }
 
   });
 
-  if (stopSubmit) {
-    e.preventDefault();
+  if (form.checkValidity()) {
+    form.submit();
   }
 
 });

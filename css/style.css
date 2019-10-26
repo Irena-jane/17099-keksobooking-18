@@ -635,7 +635,7 @@ fieldset {
 .ad-form__element select:valid:focus,
 .ad-form__element textarea:valid:focus {
   outline: none;
-  -webkit-box-shadow: 0 0 2px 2px #44bb66;
+  -webkit-box-shadow: 0 0 2px 2px #44bb66;/*green*/
   box-shadow: 0 0 2px 2px #44bb66;
 }
 
