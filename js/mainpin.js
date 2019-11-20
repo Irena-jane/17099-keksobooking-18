@@ -4,12 +4,13 @@
 
   var mainPin = window.page.mainPin;
   var setAddress = window.page.setAddress;
-  var minY = window.appdata.min_y;
-  var maxY = window.appdata.max_y;
+  var minY = window.pin.min_y;
+  var maxY = window.pin.max_y;
 
   var map = window.page.map;
 
   var mainPinWidth = parseInt(getComputedStyle(mainPin).getPropertyValue('width'), 10);
+
 
   var mouseDownHandler = function (e) {
     e.preventDefault();
@@ -18,7 +19,6 @@
       x: e.clientX,
       y: e.clientY
     };
-
 
     var mouseMoveHandler = function (eMove) {
       eMove.preventDefault();
