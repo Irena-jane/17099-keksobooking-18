@@ -33,8 +33,8 @@
 
 
   var getLimitedArr = function (ads) {
-     var adsCopy = ads.slice();
-    if(ads.length > LIMIT) {
+    var adsCopy = ads.slice();
+    if (ads.length > LIMIT) {
       var _ads = adsCopy.slice(0, LIMIT);
       adsCopy = _ads;
     }
@@ -58,7 +58,7 @@
   var createMapPins = function () {
 
     var ads = getLimitedArr(window.appdata.ads);
-     console.log('from pin -> createMapPins', ads);
+    // console.log('from pin -> createMapPins', ads);
     var template = document.querySelector('#pin')
     .content
     .querySelector('.map__pin');

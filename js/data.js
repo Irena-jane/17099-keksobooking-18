@@ -15,7 +15,7 @@
   xhr.addEventListener('load', function () {
     ads = xhr.response;
     var loyalAds = getWithinMapArr(ads);
-    console.log(loyalAds);
+    // console.log(loyalAds);
     window.appdata = {
       'ads': loyalAds
 

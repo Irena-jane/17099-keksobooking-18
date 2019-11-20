@@ -9,7 +9,7 @@
   var map = window.page.map;
   var pageActivate = window.page.activate;
 
-  //var getRandomArr = window.filters.getRandomArr;
+  // var getRandomArr = window.filters.getRandomArr;
   var getLimitedArr = window.filters.getLimitedArr;
 
 

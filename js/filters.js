@@ -26,7 +26,7 @@
       return true;
     })
     .filter(function (ad) {
-      if(ad.offer){
+      if (ad.offer) {
         return true;
       }
       return false;
@@ -56,15 +56,15 @@
 
   var getByHousingType = function (ads, type) {
 
-      if(type === 'any') {
-        return true;
-      }
+    if (type === 'any') {
+      return true;
+    }
 
-      var _ads = ads.filter(function(ad){
-          return ad.offer.type === type;
-      });
+    var _ads = ads.filter(function (ad) {
+      return ad.offer.type === type;
+    });
 
-      return _ads;
+    return _ads;
   };
 
   window.filters = {
