@@ -123,6 +123,8 @@
 
   window.appdata = {'ads': createAds(USER_MAX),
     'min_y': MIN_Y,
+    'max_y': MAX_Y,
+    'max_x': maxLocationX,
     'pinWidth': pinWidth,
     'pinHeight': pinHeight
   };
