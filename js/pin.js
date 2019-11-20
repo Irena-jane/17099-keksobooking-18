@@ -2,9 +2,9 @@
 
 (function () {
 
-
   var MIN_Y = 130;
   var MAX_Y = 630;
+  var LIMIT = 5;
 
   var getPinParams = function () {
     var template = document.querySelector('#pin')
@@ -31,6 +31,16 @@
   var pinWidth = params.width;
   var pinHeight = params.height;
 
+
+  var getLimitedArr = function (ads) {
+     var adsCopy = ads.slice();
+    if(ads.length > LIMIT) {
+      var _ads = adsCopy.slice(0, LIMIT);
+      adsCopy = _ads;
+    }
+    return adsCopy;
+  };
+
   var createMapPin = function (obj, template) {
 
     var elem = template.cloneNode(true);
@@ -47,26 +57,8 @@
 
   var createMapPins = function () {
 
-    var ads = window.appdata.ads.filter(function (ad) {
-      var map = document.querySelector('.map');
-      var maxLeft = parseInt(getComputedStyle(map).getPropertyValue('width'), 10) - pinWidth;
-      var x = ad.location.x;
-      var y = ad.location.y;
-
-      if (x > maxLeft
-          || x < pinWidth
-          || y < MIN_Y
-          || y > MAX_Y) {
-
-        return false;
-      }
-
-      return true;
-    });
-
-    window.appdata.ads = ads;
-
-    // console.log('from pin -> createMapPins', ads);
+    var ads = getLimitedArr(window.appdata.ads);
+     console.log('from pin -> createMapPins', ads);
     var template = document.querySelector('#pin')
     .content
     .querySelector('.map__pin');
@@ -96,7 +88,9 @@
     'min_y': MIN_Y,
     'pinWidth': pinWidth,
     'pinHeight': pinHeight,
-    'createMapPins': createMapPins
+    'createMapPins': createMapPins,
+    'getLimitedArr': getLimitedArr
   };
+
 
 })();

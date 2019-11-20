@@ -9,6 +9,9 @@
   var map = window.page.map;
   var pageActivate = window.page.activate;
 
+  //var getRandomArr = window.filters.getRandomArr;
+  var getLimitedArr = window.filters.getLimitedArr;
+
 
   var createMapPins = window.pin.createMapPins;
   var mapPins;
@@ -66,7 +69,8 @@
       return;
     }
     isActivated = true;
-    var ads = window.appdata.ads;
+    var ads = getLimitedArr(window.appdata.ads);
+
     mapPins = createMapPins(ads);
     mapPins.forEach(function (pin) {
       pin.addEventListener('click', clickPinHandler);
