@@ -2,13 +2,14 @@
 
 (function () {
 
-  var pinWidth = window.appdata.pinWidth;
-  var pinHeight = window.appdata.pinHeight;
+  var pinWidth = window.pin.pinWidth;
+  var pinHeight = window.pin.pinHeight;
 
   var map = document.querySelector('.map');
   var adForm = document.querySelector('.ad-form');
   var formFilters = document.querySelector('.map__filters');
 
+  var mainPin = document.querySelector('.map__pin--main');
 
   var getAllFormsFields = function () {
     var fields = [].slice.call(adForm.querySelectorAll('fieldset'));
@@ -45,7 +46,6 @@
 
   // Заполнение адреса
 
-  var mainPin = document.querySelector('.map__pin--main');
 
   var setAddress = function (e) {
     var addressElem = adForm.querySelector('#address');
