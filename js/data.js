@@ -18,6 +18,7 @@
     console.log(loyalAds);
     window.appdata = {
       'ads': loyalAds
+
     };
   });
 
