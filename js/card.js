@@ -96,6 +96,7 @@
 
 
   var createCard = function (obj) {
+
     var template = document.querySelector('#card')
         .content
         .querySelector('.map__card');
