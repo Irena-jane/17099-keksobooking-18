@@ -2,9 +2,8 @@
 
 (function () {
 
-  var pinWidth = window.pin.pinWidth;
-  var pinHeight = window.pin.pinHeight;
-
+  var pinWidth = window.appdata.pinWidth;
+  var pinHeight = window.appdata.pinHeight;
 
   var map = document.querySelector('.map');
   var adForm = document.querySelector('.ad-form');
@@ -54,21 +53,18 @@
     var left = parseInt(mainPin.style.left, 10);
     var _left = Math.round(left + pinWidth / 2);
     var _top;
-    if (!e
-      || e.type !== 'mousedown'
-      || e.type !== 'mousemove') {
-
+    if (!e) {
       _top = Math.round(top + pinHeight / 2);
+      // console.log('from !e ', _top);
     }
 
-    if (e && e.type === 'mousedown'
-      || e && e.type === 'mousemove') {
+    if (e) {
       _top = Math.round(top + pinHeight);
+      // console.log('from e ', _top);
     }
 
     addressElem.value = _left + ', ' + _top;
   };
-
 
   setFormsDisabled();
   setAddress();
@@ -82,7 +78,7 @@
       setAddress(e);
     },
     'setPageDisabled': setPageDisabled,
-
+    'setAddress': setAddress,
     'mainPin': mainPin
   };
 
